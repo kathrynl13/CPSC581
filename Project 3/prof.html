@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <title>Professor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <h1>Interative Code Copy: Professor </h1>
+        <div class="grid-container">
+            <div class="prof-typing-section">
+                <form class="lectureTitle-section">
+                    <input type="text" id="input-title">
+                    <button type="submit" id="send-button-title">Upload Title</button>
+                </form>
+                <br>
+                <div class="note-box" id="grid1">
+                    <textarea name="notes" id="textNotes" cols="60" rows="35"></textarea>
+                    <button id="uploadNotesID">Upload Notes</button>
+                </div>
+            </div>
+            <div class="prof-notes" id="grid3">
+                <h3>Notes sent to class </h3>
+                <div class="sentToClass" id="notesAppend"></div>
+            </div>
+            <div class="messenger" id="grid2" >
+                <div>
+                    <h3>Send Messages to the Class</h3>
+                    <div class="messageBubble" id="messageAppend"></div>
+                </div>
+                <form id="send-container">
+                    <input type="text" id="message-input">
+                    <button type="submit" id="send-button">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+<script>
+    //JavaScript code starts here
+    const socket = io('http://localhost:3000')
+
+    //CHAT FUNTIONALITY
+    socket.emit('send-chat-message', "Professor: connected")
+    socket.on('chat-message', data => {
+        appendMessage(data, 'themAppend')
+    })
+
+    document.getElementById('send-container').addEventListener('submit', e => {
+        e.preventDefault()
+        const message = document.getElementById('message-input').value
+        appendMessage(`Professor: ${message}`, 'youAppend')
+        tempMsg = "Professor: " + message
+        document.getElementById('message-input').value = ''
+        socket.emit('send-chat-message', tempMsg)
+        
+    })
+
+    function appendMessage(message, className) {
+        const messageElement = document.createElement('div')
+        messageElement.classList.add(className);
+        let temp = document.createTextNode(message);
+        messageElement.appendChild(temp)
+        document.getElementById('messageAppend').append(messageElement)
+    }
+
+    //NOTE FUNCTIONALITY
+    document.getElementById('uploadNotesID').addEventListener('click', e => {
+        const theNotes = document.getElementById('textNotes').value
+        appendNotes(theNotes)
+        socket.emit('send-notes', theNotes)
+        document.getElementById('textNotes').value = ''
+    })
+
+    function appendNotes(notes) {
+        const messageElement = document.createElement('div')
+        messageElement.innerText = notes
+        document.getElementById('notesAppend').append(messageElement)
+    }
+    //notes title 
+    document.getElementById('send-button-title').addEventListener('click', e => {
+        const title = document.getElementById('input-title').value
+        const theNotes = document.getElementById('textNotes').value
+        appendNotes("Change title to:"+ theNotes)
+        socket.emit('note-title', title)
+        document.getElementById('input-title').value = title
+    })
+</script>
+</html>

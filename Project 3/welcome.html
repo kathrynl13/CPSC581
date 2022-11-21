@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>  
+    <title>Welcome</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="welcomeBody">
+    <div class="welcome">
+        <p style="font-size:35px"> Who are you?</p>
+        <div class="whoAreYouWelcome">
+            <button id="profButton" style="font-size:35px">Professor</button>
+            <button id="studentButton" style="font-size:35px">Student</button>
+        </div>
+    </div>
+</body>
+<script>
+    const socket = io('http://localhost:3000')
+    
+    document.getElementById('profButton').addEventListener('click', e => {
+        window.location.href = "/prof.html";
+    })
+  
+    document.getElementById('studentButton').addEventListener('click', e => {
+        window.location.href = "/index.html";
+    })
+    
+</script>
+</html>

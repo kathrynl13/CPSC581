@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Student</title>
+    <script defer src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.cdnfonts.com/css/f-fase-bulan" rel="stylesheet">
+                
+    <!-- for setting up tinyMCE -->
+    <script src="C:\Users\sleea\Downloads\project3nov8\project3\tinymce\js\tinymce\tinymce.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.5.6/tinymce.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/tinymce/4.5.6/jquery.tinymce.min.js"></script>
+
+
+    <!--
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    -->
+</head>
+
+<body>
+    <div class="wrapper">
+        <h1>Interactive Code Copy: Student </h1>
+        
+        <div class="grid-container">
+
+            <div class="note-section">
+                <div class="note-header">
+                    <div>
+                        <h2 id="filename">Lecture Title</h2>
+                    </div>
+                    <div class="download-section">
+                        <!--<button id="create" type="submit" download="info.txt">Download Note File</button>-->
+                        <a download="info.txt" class="h2" id="downloadlink" style="font-family: 'f Fase Bulan', sans-serif">Download Here</a>
+                    </div>
+                </div>
+                <div class="note-box" id="grid1" contenteditable="true">
+                    <textarea name="notes" id="textNotes" cols="85" rows="35" contenteditable="true"></textarea>
+                </div>
+                
+            </div>
+
+            <div class="messenger" id="grid2" >
+                <div>
+                    <p>Enter name or remain anonymous in chat:</p>
+                    <form id="setname-container">
+                        <input type="text" id="personName">
+                        <button type="submit" id="nameButton">Submit Name</button>
+                    </form>
+                
+                    <h3>Send Messages to Classmates!</h3>
+                    <div class="messages-section">
+                        <div class="messageBubble" id="messageAppend"></div>
+                    </div>
+                </div>
+                <form id="send-container">
+                    <input type="text" id="message-input">
+                    <button type="submit" id="send-button">Send</button>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</body>
+
+<script>
+    //JavaScript code starts here
+    const socket = io('http://localhost:3000')
+    var name = "Anonymous"
+    const messageContainer = document.getElementById('message-container')
+    const messageForm = document.getElementById('send-container')
+    const messageInput = document.getElementById('message-input')
+
+    //CHAT FUNCTIONALITY
+    socket.on('chat-message', data => {
+        appendMessage(data, 'themAppend')
+    })
+
+    document.getElementById('send-container').addEventListener('submit', e => {
+        e.preventDefault()
+        const message = document.getElementById('message-input').value
+        appendMessage(`You: ${message}`, 'youAppend')
+        tempMsg = name + ": " + message
+        socket.emit('send-chat-message', tempMsg)
+        document.getElementById('message-input').value = ''
+    })
+
+    function appendMessage(message, className) {
+        const messageElement = document.createElement('div')
+        messageElement.classList.add(className);
+        let temp = document.createTextNode(message);
+        messageElement.appendChild(temp)
+        document.getElementById('messageAppend').append(messageElement)
+    }
+
+    //setting name
+    document.getElementById('setname-container').addEventListener('submit', event => {
+        event.preventDefault()
+        const personName = document.getElementById('personName').value
+        name = personName
+        appendMessage(`${name} connected`, 'youAppend')
+        const tempMsg = name + ": connected"
+        socket.emit('send-chat-message', tempMsg)
+    })
+
+    //NOTE FUNCTIONALITY
+    socket.on('add-notes', notes =>{
+        const notesBefore = document.getElementById('textNotes').value
+        const notesAdded = notesBefore + "\n" + notes 
+        document.getElementById('textNotes').value = notesAdded
+    })
+    //note title
+    socket.on('add-notes-title', notes =>{
+        document.getElementById('filename').innerHTML = notes
+    })
+
+    /*
+    tinymce.init({
+        selector: '#textNotes'
+        });
+
+    */
+
+    function createFile() {
+    var textFile = null,
+        makeTextFile = function(text) {
+            var data = new Blob([text], {
+                type: 'text/plain'
+            });
+
+            if (textFile !== null) {
+                window.URL.revokeObjectURL(textFile);
+            }
+
+            textFile = window.URL.createObjectURL(data);
+
+            return textFile;
+        };
+
+
+    var create = document.getElementById('create');
+    var fileContent = document.getElementById("textNotes");
+
+    downloadlink.addEventListener('click', function() {
+        const fileName = document.getElementById("filename").innerHTML;
+        document.getElementById("downloadlink").setAttribute("download", fileName);
+        var link = document.getElementById('downloadlink');
+        link.href = makeTextFile(fileContent.value);
+        link.style.display = 'block';
+    }, false);
+    };
+    
+    createFile();
+ 
+    /*
+    const elements = document.querySelectorAll('.btn');
+    elements.forEach(element => {
+        element.addEventListener('click', () => {
+            let command = element.dataset['element'];
+            document.execCommand(command, false, null);
+        });
+    });
+    */
+</script>
+</html>
